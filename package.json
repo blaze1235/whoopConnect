@@ -1,0 +1,32 @@
+{
+  "name": "whoop-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot that explains WHOOP health data in simple Russian or Uzbek",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "migrate": "tsx src/migrate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "openai": "^4.77.0",
+    "pg": "^8.13.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
