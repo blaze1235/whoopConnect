@@ -5,11 +5,20 @@ import { bot, notifyWhoopConnected } from "./bot";
 import { startScheduler } from "./scheduler";
 import { getUser, saveWhoopTokens } from "./users";
 import { exchangeCodeForTokens } from "./whoop";
+import { privacyPolicyHtml, termsOfServiceHtml } from "./pages";
 
 export const app = express();
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
+});
+
+app.get("/privacy", (_req, res) => {
+  res.type("html").send(privacyPolicyHtml);
+});
+
+app.get("/terms", (_req, res) => {
+  res.type("html").send(termsOfServiceHtml);
 });
 
 // Simple HTML pages the user sees in the browser after the WHOOP login.
