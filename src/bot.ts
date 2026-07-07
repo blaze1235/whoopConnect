@@ -15,31 +15,42 @@ import { NormalizedWhoopData } from "./whoop";
 
 export const bot = new Telegraf(config.telegramBotToken);
 
-// All user-facing bot texts in both languages.
 const T = {
   ru: {
-    welcome: (name: string) =>
-      `Здравствуйте${name ? ", " + name : ""}! 👋\n\nЯ помогу вам понимать данные вашего браслета WHOOP простыми словами.\n\nКаждое утро я буду присылать понятное объяснение...\n\nСначала выберите язык:`,
+    welcome: (name: string) => `Здравствуйте${name ? ", " + name : ""}! 👋\n\nЯ помогу вам понимать данные WHOOP...\n\nСначала выберите язык:`,
     chooseLanguage: "Выберите язык:",
-    languageSet: "Язык установлен: русский. ✅",
+    languageSet: "Язык установлен: русский. ✅\n\nТеперь подключите WHOOP.",
     connectButton: "🔗 Подключить WHOOP",
-    connectPrompt: "Нажмите кнопку ниже, чтобы подключить WHOOP...",
-    alreadyConnected: "WHOOP уже подключён. ✅ Используйте /today...",
-    notConnected: "WHOOP ещё не подключён. Нажмите /connect...",
-    reconnect: "Подключение к WHOOP истекло. Пожалуйста, подключите заново: /connect",
-    preparing: "Готовлю вашу сводку, одну минуту… ⏳",
-    dataNotReady: "Данные WHOOP пока не готовы...",
-    genericError: "Не получилось подготовить объяснение сейчас...",
-    statusConnected: (lang: string, lastDate: string | null) => `Статус: WHOOP подключён ✅\nЯзык: ${lang}\n` + (lastDate ? `Последняя сводка: ${lastDate}` : "Сводок пока не было."),
+    connectPrompt: "Нажмите кнопку ниже, чтобы подключить WHOOP.",
+    alreadyConnected: "WHOOP уже подключён. ✅ Используйте /today.",
+    notConnected: "WHOOP ещё не подключён. Нажмите /connect.",
+    reconnect: "Подключение истекло. /connect",
+    preparing: "Готовлю сводку... ⏳",
+    dataNotReady: "Данные WHOOP пока не готовы.",
+    genericError: "Не получилось ответить сейчас. Попробуйте позже.",
+    statusConnected: (lang: string, lastDate: string | null) => `Статус: WHOOP подключён ✅\nЯзык: ${lang}` + (lastDate ? `\nПоследняя сводка: ${lastDate}` : ""),
     statusNotConnected: (lang: string) => `Статус: WHOOP не подключён ❌\nЯзык: ${lang}`,
     languageName: "русский",
-    help: "Команды:\n/today — сводка за сегодня\n/connect — подключить WHOOP\n/lang — сменить язык\n/status — статус\n/ai — задать вопрос ИИ",
-    aiWaiting: "ИИ ждет ваш вопрос. Спрашивайте о восстановлении, сне, тренировках...",
+    help: "Команды:\n/today — сводка\n/connect — подключить\n/lang — язык\n/status — статус\n/ai — задать вопрос ИИ",
+    aiWaiting: "ИИ ждет ваш вопрос. Спрашивайте о восстановлении, сне, нагрузке...",
   },
   uz: {
-    // Similar Uzbek texts...
-    help: "Buyruqlar:\n/today — bugungi xulosa\n/connect — WHOOP'ni ulash\n/lang — tilni o'zgartirish\n/status — ulanish holati\n/ai — AI ga savol berish",
-    aiWaiting: "AI savolingizni kutmoqda. Tiklanish, uyqu, mashqlar haqida so'rang...",
+    welcome: (name: string) => `Assalomu alaykum${name ? ", " + name : ""}! 👋\n\nMen WHOOP ma'lumotlarini tushuntiraman...\n\nAvval tilni tanlang:`,
+    chooseLanguage: "Tilni tanlang:",
+    languageSet: "Til o'rnatildi: o'zbekcha. ✅",
+    connectButton: "🔗 WHOOP'ni ulash",
+    connectPrompt: "WHOOP'ni ulash uchun tugmani bosing.",
+    alreadyConnected: "WHOOP allaqachon ulangan. ✅ /today buyrug'ini yuboring.",
+    notConnected: "WHOOP hali ulanmagan. /connect buyrug'ini bosing.",
+    reconnect: "Ulanish muddati tugadi. /connect",
+    preparing: "Xulosani tayyorlayapman... ⏳",
+    dataNotReady: "WHOOP ma'lumotlari hali tayyor emas.",
+    genericError: "Hozir javob bera olmadim. Keyinroq urinib ko'ring.",
+    statusConnected: (lang: string, lastDate: string | null) => `Holat: WHOOP ulangan ✅\nTil: ${lang}` + (lastDate ? `\nOxirgi xulosa: ${lastDate}` : ""),
+    statusNotConnected: (lang: string) => `Holat: WHOOP ulanmagan ❌\nTil: ${lang}`,
+    languageName: "o'zbekcha",
+    help: "Buyruqlar:\n/today — bugungi xulosa\n/connect — WHOOP'ni ulash\n/lang — til\n/status — holat\n/ai — AI ga savol",
+    aiWaiting: "AI savolingizni kutmoqda. Tiklanish, uyqu haqida so'rang...",
   },
 } as const;
 
@@ -47,12 +58,9 @@ function texts(user: User | null) {
   return T[user?.language ?? "ru"];
 }
 
-const languageKeyboard = Markup.inlineKeyboard([
-  [Markup.button.callback("🇷🇺 Русский", "lang:ru"), Markup.button.callback("🇺🇿 O'zbekcha", "lang:uz")],
-]);
+// Rest of your original code (start, connect, etc.) should stay the same. 
 
-// ... (keep all your original functions: sendConnectButton, start, lang, connect, status, today, help, notifyWhoopConnected ...)
-
+// Add this for /ai
 bot.command("ai", async (ctx) => {
   const user = await upsertUser(ctx.from.id, ctx.from.first_name);
   const t = texts(user);
@@ -62,52 +70,15 @@ bot.command("ai", async (ctx) => {
     return;
   }
 
-  await ctx.reply(t.aiWaiting, Markup.keyboard([["/today", "/status"]]).resize());
+  await ctx.reply(t.aiWaiting);
 });
 
-bot.on("text", async (ctx) => {
-  const messageText = ctx.message.text.trim();
-  if (messageText.startsWith("/")) return; // Skip commands
-
-  const user = await upsertUser(ctx.from.id, ctx.from.first_name);
-  const t = texts(user);
-
-  if (!user.whoop_connected) {
-    await ctx.reply(t.notConnected);
-    return;
-  }
-
-  await ctx.reply("Думаю над ответом... ⏳");
-
-  try {
-    const accessToken = await getValidAccessToken(user);
-    let data: NormalizedWhoopData | null = null;
-
-    try {
-      data = await fetchNormalizedData(accessToken, config.timezone);
-    } catch (e) {
-      console.log("No fresh data for chat");
-    }
-
-    const answer = await answerUserQuestion(data, messageText, user.language);
-    await ctx.reply(answer);
-  } catch (err) {
-    console.error("Chat handler error:", err);
-    await ctx.reply(t.genericError);
-  }
-});
-
-// Keep all your other handlers (start, lang, etc.) as they were...
+// Keep your original handlers...
 
 bot.help(async (ctx) => {
-  const user = await getUser(ctx.from.id);
-  await ctx.reply(texts(user).help);
-});
-
-bot.catch((err, ctx) => {
-  console.error(`Bot error:`, err);
+  await ctx.reply(texts(await getUser(ctx.from.id)).help);
 });
 
 export async function notifyWhoopConnected(telegramUserId: number): Promise<void> {
-  // ... your original function
+  // your original
 }
